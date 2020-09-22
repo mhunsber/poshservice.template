@@ -43,7 +43,8 @@ install:
   - ps: 'Get-CimInstance win32_operatingsystem -Property Caption, OSArchitecture, Version | fl Caption, OSArchitecture, Version'
   # to run script as a PowerShell command prepend it with ps:
   - ps: $PSVersionTable
-  # batch commands start from cmd:
+
+  - ps: 'Install-Module -Name Pester -Force'
   - ps: 'Get-Module -Name Pester -ListAvailable | fl Name,Version'
 
 #---------------------------------#
@@ -53,7 +54,8 @@ install:
 # scripts to run before build
 before_build:
   - ps: |
-      (Get-Content -Path poshservice.template.nuspec -Raw) -replace '<version>(.+)</version>', "<version>`$1.$($env:APPVEYOR_BUILD_NUMBER)</version>"
+      $nuspecFile = '.\poshservice.template.nuspec'
+      (Get-Content -Path $nuspecFile -Raw) -replace '<version>(.+)</version>', "<version>`$1.$($env:APPVEYOR_BUILD_NUMBER)</version> | Out-File -Path $nuspecFile
 
 # to run your custom scripts instead of automatic MSBuild
 build_script:
@@ -77,7 +79,7 @@ before_test:
 
 # to run your custom scripts instead of automatic tests
 test_script:
-  - ps: pester_tests.ps1
+  - ps: '.\pester_tests.ps1'
 
 # scripts to run after tests
 after_test:
