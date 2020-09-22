@@ -46,6 +46,8 @@ install:
 
   - ps: 'Install-Module -Name Pester -Force'
   - ps: 'Get-Module -Name Pester -ListAvailable | fl Name,Version'
+  - choco install nssm -y
+  - ps: 'Get-Command -Name nssm | fl'
 
 #---------------------------------#
 #       build configuration       #
