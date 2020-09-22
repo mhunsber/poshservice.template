@@ -5,12 +5,9 @@ BeforeAll {
 
 Describe "Invoke-Nssm" {
     BeforeAll {
-        $originalEncoding = [System.Console]::OutputEncoding
+        Mock Get-ConsoleEncoding { return 'default' }
+        Mock Set-ConsoleEncoding { }
         function nssm { } # override the exe
-    }
-    AfterAll {
-        # just in case
-        [System.Console]::OutputEncoding = $originalEncoding
     }
     It "calls nssm" {
         Mock nssm {} -Verifiable
@@ -31,12 +28,12 @@ Describe "Invoke-Nssm" {
         Mock nssm { return 'test output' }
         Invoke-Nssm 'test' | Should -Be 'test output'
     }
-    It "sets the output encoding to Unicode when nssm is called" {
-        Mock nssm { return [System.Console]::OutputEncoding }
-        Invoke-Nssm -Command 'test' | Should -Be ([System.Text.Encoding]::Unicode) -Because "nssm output has erroneous whitespace characters when using other encodings"
-    }
-    It "resets the output encoding" {
+    It "sets the output encoding to Unicode to prevent extra whitespace in the result" {
         Invoke-Nssm -Command 'test'
-        [System.Console]::OutputEncoding | Should -Be $originalEncoding -Because "it should reset the global encoding variable to avoid unpredictable behavior later"
+        Assert-MockCalled -CommandName Set-ConsoleEncoding -ParameterFilter { $Encoding -eq [System.Text.Encoding]::Unicode }
+    }
+    It "resets the output encoding to the default" {
+        Invoke-Nssm -Command 'test'
+        Assert-MockCalled -CommandName Set-ConsoleEncoding -ParameterFilter { $Encoding -eq 'default' }
     }
 }

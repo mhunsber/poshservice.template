@@ -16,7 +16,9 @@ Describe "Reset-NssmServiceLogs" {
     BeforeEach {
         New-Item -Path "TestDrive:\logs\test.log" -ItemType File -Value "temp current" -Force
         1..25 | Foreach-Object {
-            New-Item -Path "TestDrive:\logs\test-$_-rotated.log" -ItemType File -Value "temp file $_" -Force
+            $lastWriteTime = (Get-Date -Minute $_)
+            $item = New-Item -Path "TestDrive:\logs\test-$_-rotated.log" -ItemType File -Value "temp file $_" -Force
+            $item.LastWriteTime = $lastWriteTime
         }
     }
     It "Uses the rotate command from nssm" {

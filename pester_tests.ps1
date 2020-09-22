@@ -5,7 +5,7 @@ $PesterConfiguration = [PesterConfiguration]@{
     Run = @{
         ExcludePath = "$PSScriptRoot\templates\tools\include\packagename.tests.ps1"
         PassThru = $true
-        Exit = $true
+        Exit = $false
     }
     CodeCoverage = @{
         Enabled = $false

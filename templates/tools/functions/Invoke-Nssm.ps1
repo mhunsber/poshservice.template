@@ -1,4 +1,13 @@
 # This is only for fixing a whitespace issue with nssm (https://groups.google.com/g/salt-users/c/DTstUL3qHzk/m/K9YZQFG5CgAJ)
+
+function Get-ConsoleEncoding {
+    return [System.Console]::OutputEncoding
+}
+
+function Set-ConsoleEncoding($Encoding) {
+    [System.Console]::OutputEncoding = $Encoding
+}
+
 function Invoke-Nssm {
     [CmdletBinding()]
     param(
@@ -7,9 +16,9 @@ function Invoke-Nssm {
         [Parameter(ValueFromRemainingArguments)]
         [string[]]$ArgumentList
     )
-    $previousEncoding = [Console]::OutputEncoding
-    [System.Console]::OutputEncoding = [System.Text.Encoding]::Unicode
+    $previousEncoding = Get-ConsoleEncoding
+    Set-ConsoleEncoding -Encoding ([System.Text.Encoding]::Unicode)
     $nssm = nssm $Command @ArgumentList
-    [System.Console]::OutputEncoding = $previousEncoding
+    Set-ConsoleEncoding $previousEncoding
     return $nssm
 }
