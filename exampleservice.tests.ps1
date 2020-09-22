@@ -63,12 +63,11 @@ Describe "exampleservice" {
             $svc.Description | Should -Be "The Description"
         }
         It "sets the user context" {
-            $svc = Get-WmiObject -Class 'Win32_Service' -Filter "Name='exampleservice'"
             $svc.StartName | Should -BeLike '*LocalService'
         }
         It "sets the start mode" {
             $svc.StartMode | Should -Be 'Auto'
-            $svc.DelayedAutoStart | Should -Be $true
+            (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\exampleservice').DelayedAutoStart | Should -Be 1
         }
     }
     Describe "chocolateyUninstall" {
@@ -89,17 +88,18 @@ Describe "exampleservice" {
         }
         It "starts" {
             { Start-Service -Name exampleservice } | Should -Not -Throw
-            Start-Sleep -Milliseconds 50
+            Start-Sleep -Seconds 1
             (Get-Service -Name exampleservice).Status | Should -Be 'Running'
         }
         It "stops" {
             Start-Service -Name exampleservice
             { Stop-Service -Name exampleservice } | Should -Not -Throw
-            Start-Sleep -Milliseconds 50
+            Start-Sleep -Seconds 1
             (Get-Service -Name exampleservice).Status | Should -Be 'Stopped'
         }
         It "outputs to a file" {
             Start-Service -Name exampleservice
+            Start-Sleep -Seconds 1
             'C:\exampleservice\logs\test.log' | Should -Exist
         }
         It "Resumes after an update" {
@@ -107,7 +107,7 @@ Describe "exampleservice" {
             (Get-Content -Path $nuspecFile -Raw) -replace '<version>1.0</version>', "<version>1.1</version>" | Out-File -FilePath $nuspecFile
             choco pack $nuspecFile
             choco upgrade exampleservice -s . -y
-            Start-Sleep -Milliseconds 250
+            Start-Sleep -Seconds 1
             (Get-Service -Name exampleservice).Status | Should -Be 'Running'
         }
     }
