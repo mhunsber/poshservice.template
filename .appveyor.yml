@@ -44,7 +44,7 @@ install:
   # to run script as a PowerShell command prepend it with ps:
   - ps: $PSVersionTable
   # batch commands start from cmd:
-  - ps: 'Get-InstallModule -Name Pester | fl Name,Version'
+  - ps: 'Get-InstalledModule -Name Pester | fl Name,Version'
 
 #---------------------------------#
 #       build configuration       #
