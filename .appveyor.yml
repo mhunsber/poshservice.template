@@ -55,7 +55,7 @@ install:
 before_build:
   - ps: |
       $nuspecFile = '.\poshservice.template.nuspec'
-      (Get-Content -Path $nuspecFile -Raw) -replace '<version>(.+)</version>', "<version>`$1.$($env:APPVEYOR_BUILD_NUMBER)</version>" | Out-File -Path $nuspecFile
+      (Get-Content -Path $nuspecFile -Raw) -replace '<version>(.+)</version>', "<version>`$1.$($env:APPVEYOR_BUILD_NUMBER)</version>" | Out-File -FilePath $nuspecFile
 
 # to run your custom scripts instead of automatic MSBuild
 build_script:
