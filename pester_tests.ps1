@@ -1,3 +1,5 @@
+#Requires -Module @{ ModuleName = 'Pester'; ModuleVersion = '5.0' }
+
 $testResultsFile = "PesterResults.xml"
 $PesterConfiguration = [PesterConfiguration]@{
     Run = @{
