@@ -1,5 +1,7 @@
 # PowerShell Service Chocolatey Package
 
+[![build status](https://ci.appveyor.com/api/projects/status/github/mhunsber/poshservice.template?svg=true)](https://ci.appveyor.com/project/mhunsber/poshservice.template)
+
 ## Summary
 
 This sets up a template for executing a PowerShell script as a simple background windows service.
