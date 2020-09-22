@@ -44,9 +44,11 @@ Describe "exampleservice" {
         }
 "@
         # I don't like that we have to do this, but appveyor does not let you set the console output, so we have to change very the scripts we're testing
+        # Fake out the results of getting the start user context
+        # Remove any references to output encoding
         (Get-Content -Path '.\exampleservice\tools\chocolateyInstall.ps1' -Raw) `
-            -replace '.+console\]::OutputEncoding\s?=.+', '#$0' ` # remove any output encoding assignment
-            -replace 'nssm get .+ objectname', '"NT Authority\LocalService"' | ` # fake out the runas result
+            -replace '.+console\]::OutputEncoding\s?=.+', '#$0' `
+            -replace 'nssm get .+ objectname', '"NT Authority\LocalService"' | `
             Out-File -FilePath '.\exampleservice\tools\chocolateyInstall.ps1'
         (Get-Content -Path '.\exampleservice\tools\chocolateyUninstall.ps1' -Raw) `
             -replace '.+console\]::OutputEncoding\s?=.+', '#$0' `
