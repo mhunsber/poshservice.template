@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>poshservice.template</id>
+    <version>1.0</version>
+    <packageSourceUrl>https://github.com/mhunsber/chocolatey-packages</packageSourceUrl>
+    <owners>Micah Hunsberger</owners>
+    <title>Chocolatey PowerShell Service Template</title>
+    <authors>Micah Hunsberger</authors>
+    <projectUrl>https://gitbuh.com/mhunsber/chocolatey-packages</projectUrl>
+    <iconUrl>https://github.com/chocolatey/choco/raw/master/docs/logo/chocolateyicon.gif</iconUrl>
+    <copyright>2020 Micah Hunsberger</copyright> -->
+    <!-- If there is a license Url available, it is required for the community feed -->
+    <licenseUrl>https://raw.githubusercontent.com/mhunsber/chocolatey-packages/master/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>-->
+    <tags>powershell service package template</tags>
+    <summary>PowerShell Service Chocolatey template</summary>
+    <description>### PowerShell Service Chocolatey Template
+This adds a chocolatey template for creating new PowerShell scripts that run like services under NSSM.
+Using this template will create the scaffolding for developing a new self-logging powershell script that can be installed as a service.
+    </description>
+  </metadata>
+  <files>
+    <file src="templates\**" target="templates" />
+  </files>
+</package>
