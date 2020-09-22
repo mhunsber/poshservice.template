@@ -1,4 +1,4 @@
-Describe "exampleservice" {
+Describe "exampleservice" -Skip:($null -ne $env:APPVEYOR) {
     BeforeAll {
         if(!(Test-Path -Path "$PSScriptRoot\poshservice.template.*.nupkg")) {
             choco pack "$PSScriptRoot\poshservice.template.nuspec"
@@ -43,18 +43,6 @@ Describe "exampleservice" {
             }
         }
 "@
-        # I don't like that we have to do this, but appveyor does not let you set the console output, so we have to change very the scripts we're testing
-        # Fake out the results of getting the start user context
-        # Remove any references to output encoding
-        (Get-Content -Path '.\exampleservice\tools\chocolateyInstall.ps1' -Raw) `
-            -replace '.+console\]::OutputEncoding\s?=.+', '#$0' `
-            -replace 'nssm get .+ objectname', '"NT Authority\LocalService"' | `
-            Out-File -FilePath '.\exampleservice\tools\chocolateyInstall.ps1'
-        (Get-Content -Path '.\exampleservice\tools\chocolateyUninstall.ps1' -Raw) `
-            -replace '.+console\]::OutputEncoding\s?=.+', '#$0' `
-            -replace 'nssm get .+ objectname', '"NT Authority\LocalService"' | `
-            Out-File -FilePath '.\exampleservice\tools\chocolateyUninstall.ps1'
-
         choco pack $nuspecFile
     }
     Describe "chocolateyInstall" {
@@ -100,7 +88,7 @@ Describe "exampleservice" {
         }
         It "starts" {
             { Start-Service -Name exampleservice } | Should -Not -Throw
-            Start-Sleep -Seconds 1
+            Start-Sleep -Milliseconds 250
             (Get-Service -Name exampleservice).Status | Should -Be 'Running'
         }
         It "stops" {
@@ -111,7 +99,7 @@ Describe "exampleservice" {
         }
         It "outputs to a file" {
             Start-Service -Name exampleservice
-            Start-Sleep -Seconds 1
+            Start-Sleep -Milliseconds 250
             'C:\exampleservice\logs\test.log' | Should -Exist
         }
         It "Resumes after an update" {
@@ -119,7 +107,7 @@ Describe "exampleservice" {
             (Get-Content -Path $nuspecFile -Raw) -replace '<version>1.0</version>', "<version>1.1</version>" | Out-File -FilePath $nuspecFile
             choco pack $nuspecFile
             choco upgrade exampleservice -s . -y
-            Start-Sleep -Seconds 1
+            Start-Sleep -Milliseconds 250
             (Get-Service -Name exampleservice).Status | Should -Be 'Running'
         }
     }

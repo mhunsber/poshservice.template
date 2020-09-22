@@ -81,7 +81,7 @@ before_test:
 
 # to run your custom scripts instead of automatic tests
 test_script:
-  - ps: '.\pester_tests.ps1 -TestExampleService'
+  - ps: '.\pester_tests.ps1'
 
 # scripts to run after tests
 after_test:
