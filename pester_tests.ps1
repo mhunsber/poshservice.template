@@ -1,9 +1,18 @@
 #Requires -Module @{ ModuleName = 'Pester'; ModuleVersion = '5.0' }
+param(
+    [switch]$TestExampleService
+)
+
+if ($TestExampleService) {
+    $ExcludePath = "$PSScriptRoot\templates\tools\include\packagename.tests.ps1"
+} else {
+    $ExcludePath = "$PSScriptRoot\templates\tools\include\packagename.tests.ps1", "$PSScriptRoot\exampleservice.tests.ps1"
+}
 
 $testResultsFile = "PesterResults.xml"
 $PesterConfiguration = [PesterConfiguration]@{
     Run = @{
-        ExcludePath = "$PSScriptRoot\templates\tools\include\packagename.tests.ps1"
+        ExcludePath = $ExcludePath
         PassThru = $true
         Exit = $false
     }
