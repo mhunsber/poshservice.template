@@ -107,6 +107,7 @@ try {
 
     # environment variables
     $currentVars = nssm get $ServiceConfig.Name appenvironmentextra
+    $currentVars = $currentVars | ConvertFrom-StringData
     $newVars = @{
         PSS_SERVICENAME=$ServiceConfig.Name
         PSS_VERBOSELOG="$([int]$ServiceConfig.Logging.Verbose)"
