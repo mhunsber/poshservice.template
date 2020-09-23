@@ -48,7 +48,7 @@ How to pass package parameters: https://chocolatey.org/docs/commandsinstall
 
     <!-- Specifying dependencies and version ranges? https://docs.nuget.org/create/versioning#specifying-version-ranges-in-.nuspec-files -->
     <dependencies>
-      <dependency id="nssm" version="2.24.0" />
+      <dependency id="nssm" version="[2.24.0,2.24.1)" /> <!-- the prerelease versions do not properly exit the nssm.exe process when online rotation is enabled -->
       <!--<dependency id="" version="__MINIMUM_VERSION__" />
       <dependency id="" version="[__EXACT_VERSION__]" />
       <dependency id="" version="[_MIN_VERSION_INCLUSIVE, MAX_VERSION_INCLUSIVE]" />
