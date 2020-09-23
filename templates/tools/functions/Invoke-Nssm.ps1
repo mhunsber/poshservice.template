@@ -6,14 +6,17 @@ function Invoke-Nssm {
         [Parameter(ValueFromRemainingArguments)]
         [string[]]$ArgumentList
     )
+    $nssmPath = (Get-Command -Name 'nssm.exe' -CommandType Application -ErrorAction Stop).Definition
     $pinfo = New-Object System.Diagnostics.ProcessStartInfo
-    $pinfo.FileName = 'nssm.exe'
+    $pinfo.FileName = $nssmPath
     $pinfo.RedirectStandardError = $true
     $pinfo.RedirectStandardOutput = $true
-
-    # This fixes a whitespace issue with nssm (https://groups.google.com/g/salt-users/c/DTstUL3qHzk/m/K9YZQFG5CgAJ)
-    $pinfo.StandardOutputEncoding = [System.Text.Encoding]::Unicode
-    $pinfo.StandardErrorEncoding = [System.Text.Encoding]::Unicode
+    $nssmVersion = (Get-Item -Path $nssmPath).VersionInfo.FileVersion
+    if ($nssmVersion -lt [version]'2.24.101') {
+        # This fixes a whitespace issue with nssm prior to 2.24.101 (https://groups.google.com/g/salt-users/c/DTstUL3qHzk/m/K9YZQFG5CgAJ)
+        $pinfo.StandardOutputEncoding = [System.Text.Encoding]::Unicode
+        $pinfo.StandardErrorEncoding = [System.Text.Encoding]::Unicode
+    }
     $pinfo.UseShellExecute = $false
     $pinfo.Arguments = (,$Command + $ArgumentList | ForEach-Object { '"' + $_.Replace('"','\"') + '"' } ) -join ' '
     $p = New-Object System.Diagnostics.Process
