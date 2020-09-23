@@ -10,6 +10,7 @@ function Invoke-Nssm {
     $pinfo.FileName = 'nssm.exe'
     $pinfo.RedirectStandardError = $true
     $pinfo.RedirectStandardOutput = $true
+
     # This fixes a whitespace issue with nssm (https://groups.google.com/g/salt-users/c/DTstUL3qHzk/m/K9YZQFG5CgAJ)
     $pinfo.StandardOutputEncoding = [System.Text.Encoding]::Unicode
     $pinfo.StandardErrorEncoding = [System.Text.Encoding]::Unicode
@@ -27,4 +28,5 @@ function Invoke-Nssm {
     }
     Write-Output $stdout
     $LASTEXITCODE = $p.ExitCode
+    $p.Dispose()
 }
