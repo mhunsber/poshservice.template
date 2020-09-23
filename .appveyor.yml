@@ -46,7 +46,10 @@ install:
 
   - ps: 'Install-Module -Name Pester -Force'
   - ps: 'Get-Module -Name Pester -ListAvailable | fl Name,Version'
-  - choco install nssm -y
+
+  # the latest version on chocolatey.org is a prerelease
+  # We only want the stable version
+  - choco install nssm -y --version 2.24.0.20170619
   - ps: 'Get-Command -Name nssm | fl'
 
 #---------------------------------#
@@ -81,7 +84,7 @@ before_test:
 
 # to run your custom scripts instead of automatic tests
 test_script:
-  - ps: '.\pester_tests.ps1'
+  - ps: '.\pester_tests.ps1 -TestExampleService'
 
 # scripts to run after tests
 after_test:
