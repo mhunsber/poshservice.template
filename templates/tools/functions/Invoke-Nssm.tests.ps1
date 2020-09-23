@@ -3,37 +3,28 @@ BeforeAll {
     . $scriptPath -Verbose
 }
 
-Describe "Invoke-Nssm" {
+Describe "Invoke-Nssm" -Skip:($null -eq (Get-Command -Name nssm.exe -CommandType Application -ErrorAction Ignore)) {
     BeforeAll {
-        Mock Get-ConsoleEncoding { return 'default' }
-        Mock Set-ConsoleEncoding { }
-        function nssm { } # override the exe
+        Invoke-Nssm -Command 'install' 'testservice' 'powershell.exe' -ErrorAction Stop
     }
-    It "calls nssm" {
-        Mock nssm {} -Verifiable
-        Invoke-Nssm -Command 'help'
-        Assert-VerifiableMock
+    AfterAll {
+        $svc = Get-WmiObject -Class 'win32_service' -Filter "Name='testservice'"
+        if ($svc) {
+            $svc.Delete()
+        }
     }
-    It "calls nssm [command]" {
-        Mock nssm -ParameterFilter { $args[0] -eq 'help' } -Verifiable
-        Invoke-Nssm -Command 'help'
-        Assert-VerifiableMock
+    It "can register a new service" {
+        (Get-Service -Name testservice -ErrorAction Ignore) | Should -Not -BeNullOrEmpty
     }
-    It "calls nssm with extra arguments" {
-        Mock nssm -Verifiable -ParameterFilter { $args[1] -eq 'test 1' -and $args[2] -eq 'test 2' -and $args[3] -eq 'test 3'}
-        Invoke-Nssm 'help' 'test 1' 'test 2' 'test 3'
-        Assert-VerifiableMock
+    It "can get service properties" {
+        Invoke-Nssm -Command 'get' 'testservice' 'application' | Should -Be 'powershell.exe'
     }
-    It "returns the result of the nssm command" {
-        Mock nssm { return 'test output' }
-        Invoke-Nssm 'test' | Should -Be 'test output'
+    It "can set service properties" {
+        Invoke-Nssm -Command 'set' 'testservice' 'appdirectory' 'C:\directory with\spaces'
+        Invoke-Nssm -Command 'get' 'testservice' 'appdirectory' | Should -Be 'C:\directory with\spaces'
     }
-    It "sets the output encoding to Unicode to prevent extra whitespace in the result" {
-        Invoke-Nssm -Command 'test'
-        Assert-MockCalled -CommandName Set-ConsoleEncoding -ParameterFilter { $Encoding -eq [System.Text.Encoding]::Unicode }
-    }
-    It "resets the output encoding to the default" {
-        Invoke-Nssm -Command 'test'
-        Assert-MockCalled -CommandName Set-ConsoleEncoding -ParameterFilter { $Encoding -eq 'default' }
+    It 'can remove the service' {
+        Invoke-Nssm -Command 'remove' 'testservice' 'confirm'
+        (Get-Service -Name testservice -ErrorAction Ignore) | Should -BeNullOrEmpty
     }
 }

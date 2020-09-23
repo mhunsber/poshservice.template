@@ -33,7 +33,7 @@ Describe "exampleservice" -Skip:($null -ne $env:APPVEYOR) {
             Startup = 'SERVICE_DELAYED_AUTO_START' # SERVICE_AUTO_START|SERVICE_DELAYED_AUTO_START|SERVICE_DEMAND_START|SERVICE_DISABLED
             ShutdownTimeout = 5000
             Logging = @{
-                Path = 'C:\exampleservice\logs\test.log'
+                Path = '$TestDrive\logs\test.log'
                 Verbose=`$true
                 Rotate = @{
                     Enabled = `$true
@@ -92,15 +92,16 @@ Describe "exampleservice" -Skip:($null -ne $env:APPVEYOR) {
             (Get-Service -Name exampleservice).Status | Should -Be 'Running'
         }
         It "stops" {
-            Start-Service -Name exampleservice
-            { Stop-Service -Name exampleservice } | Should -Not -Throw
-            Start-Sleep -Seconds 1
+            $service = Get-Service -Name exampleservice
+            Start-Service -InputObject $service
+            Stop-Service -InputObject $service -NoWait
+            $service.WaitForStatus('Stopped', '00:00:05')
             (Get-Service -Name exampleservice).Status | Should -Be 'Stopped'
         }
         It "outputs to a file" {
             Start-Service -Name exampleservice
             Start-Sleep -Milliseconds 250
-            'C:\exampleservice\logs\test.log' | Should -Exist
+            "$TestDrive\logs\test.log" | Should -Exist
         }
         It "Resumes after an update" {
             Start-Service -Name exampleservice
@@ -114,10 +115,12 @@ Describe "exampleservice" -Skip:($null -ne $env:APPVEYOR) {
     AfterAll {
         Pop-Location
         choco uninstall poshservice.template
-        $service = Get-WmiObject -Class 'win32_service' -Filter "Name='exampleservice'"
-        if ($service) {
-            $service.StopService()
-            $service.Delete()
+        $serviceController = Get-Service -Name exampleservice -ErrorAction Ignore
+        if ($serviceController) {
+            Stop-Service -InputObject $serviceController -NoWait
+            $serviceController.WaitForStatus('Stopped', '00:00:05')
+            $w32service = Get-WmiObject -Class 'win32_service' -Filter "Name='exampleservice'"
+            $w32service.Delete()
         }
     }
 }
