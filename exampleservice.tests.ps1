@@ -1,9 +1,7 @@
-Describe "exampleservice" -Skip:($null -ne $env:APPVEYOR) {
+Describe "exampleservice" {
     BeforeAll {
-        if(!(Test-Path -Path "$PSScriptRoot\poshservice.template.*.nupkg")) {
-            choco pack "$PSScriptRoot\poshservice.template.nuspec"
-        }
-        choco install poshservice.template -s .
+        choco pack "$PSScriptRoot\poshservice.template.nuspec"
+        choco upgrade poshservice.template -s .
 
         Push-Location -Path "TestDrive:\"
         choco new exampleservice -t poshservice --version 1.0
@@ -95,7 +93,7 @@ Describe "exampleservice" -Skip:($null -ne $env:APPVEYOR) {
             $service = Get-Service -Name exampleservice
             Start-Service -InputObject $service
             Stop-Service -InputObject $service -NoWait
-            $service.WaitForStatus('Stopped', '00:00:05')
+            $service.WaitForStatus('Stopped', '00:00:30')
             (Get-Service -Name exampleservice).Status | Should -Be 'Stopped'
         }
         It "outputs to a file" {
@@ -118,7 +116,7 @@ Describe "exampleservice" -Skip:($null -ne $env:APPVEYOR) {
         $serviceController = Get-Service -Name exampleservice -ErrorAction Ignore
         if ($serviceController) {
             Stop-Service -InputObject $serviceController -NoWait
-            $serviceController.WaitForStatus('Stopped', '00:00:05')
+            $serviceController.WaitForStatus('Stopped', '00:00:30')
             $w32service = Get-WmiObject -Class 'win32_service' -Filter "Name='exampleservice'"
             $w32service.Delete()
         }

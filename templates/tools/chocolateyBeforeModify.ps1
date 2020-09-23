@@ -10,6 +10,6 @@ $service = Get-Service $ServiceConfig.Name -ErrorAction SilentlyContinue
 if ($service) {
     $env:PreviousServiceStatus = $service.Status # set for install script
     $service | Stop-Service -NoWait -ErrorAction Continue
-    $timeout = New-TimeSpan -Seconds (($ServiceConfig.ShutdownTimeout/1000) + 2)
+    $timeout = New-TimeSpan -Seconds (($ServiceConfig.ShutdownTimeout/1000) + 10)
     $service.WaitForStatus('Stopped', $timeout)
 }
