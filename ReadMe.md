@@ -5,8 +5,7 @@
 ## Summary
 
 This sets up a template for executing a PowerShell script as a simple background windows service.
-It uses nssm (<https://nssm.cc/usage>) for installing and managing the service.
-Nssm allows I/O Redirection, so any values that would get printed to the console get logged to a file.
+Packages created from this template use nssm (<https://nssm.cc/usage>) to install and manage the service.
 
 ## Use Case
 
@@ -18,17 +17,23 @@ Since this runs within the PowerShell interpreter, this should be used for tasks
 
 This is a chocolatey template and requires that you have chocolatey installed. <https://chocolatey.org/install>
 
+Packages created from the template require the latest stable version of nssm (2.24.0).
+The prerelease version (2.24.101) of nssm gets stuck during shutdown when online file rotation is enabled.
+
 ## Getting Started
 
 1. Clone this repository locally.
 1. Use chocolatey to package the template: `choco pack .\path\to\poshservice.template.nuspec`
 1. Use chocolatey to install the template: `choco install poshservice.template -y`.
 1. Create a new chocolatey package with the template: `choco new mynewposhservice -t poshservice`.
-1. Follow the Quick Start steps in `mynewposhservice/readme.md`.
+1. Follow the Quick Start steps in `mynewposhservice\readme.md`.
 
-## How it Works
+## Detailed Summary
 
-The chocolatey install script uses nssm to install a new windows service that runs the `startservice.ps1` script. Nssm passes in some service environment variables. If log rotation is enabled, the `startservice.ps1` script kicks off a background job that periodically rotates and deletes the I/O redirected log files. It then runs a loop that, when nssm tells the service to stop, will break out into the finally block where it can run any cleanup work needed for a graceful stop.
+Packages created from this template use nssm the install and configure a windows service that executes a powershell script.
+The script runs a loop that will break into a shutdown block when it receives a stop command so that it can handle a graceful shutdown.
+Since nssm allows I/O Redirection, any messages that would get printed to the console by the script will get appended to a file.
+If log rotation is enabled, the script kicks off a background job that will a) periodically tell nssm to rotate the logs while it is running, and b) delete old log files.
 
 ## Tests
 
