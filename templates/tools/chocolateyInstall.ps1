@@ -46,51 +46,66 @@ if (![string]::IsNullOrWhiteSpace($ServiceConfig.Description)) {
 }
 
 # service run context
+$ntAccountName = ''
+$ntAccountPass = ''
+if ([string]::IsNullOrWhiteSpace($ServiceConfig.RunAs)) {
+    $ServiceConfig.RunAs = Read-Host -Prompt "Enter the account name for $($ServiceConfig.Name) to run under."
+}
 switch($ServiceConfig.RunAs) {
     'LOCALSYSTEM' {
-        Invoke-Nssm reset $ServiceConfig.Name objectname
+        $ntAccountName = 'System'
         break
     }
     'NETWORKSERVICE' {
-        Invoke-Nssm set $ServiceConfig.Name objectname networkservice
+        $ntAccountName = 'NetworkService'
         break
     }
     'LOCALSERVICE' {
-        Invoke-Nssm set $ServiceConfig.Name objectname localservice
+        $ntAccountName = 'LocalService'
         break
     }
     default {
-        $creds = Get-Credential -UserName $ServiceConfig.RunAs -Message "Enter the account credentials for $($ServiceConfig.Name) to run under. For the username, be sure to use <domain>\<username>. For local accounts, <domain> is '.'."
-        Invoke-Nssm set $ServiceConfig.Name objectname $creds.UserName $creds.GetNetworkCredential().Password
+        $ntAccountName = if(!$ServiceConfig.RunAs.Contains('\')) {
+            "$env:COMPUTERNAME\$($ServiceConfig.RunAs)"
+        } elseif ($ServiceConfig.RunAs.StartsWith('.\')) {
+            $ServiceConfig.RunAs.Replace('.\',"$env:COMPUTERNAME\")
+        } else {
+            $ServiceConfig.RunAs
+        }
+        $securepassword = Read-Host "Enter the password for $ntAccountName" -AsSecureString
+        $ntAccountPass = (New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList 'u', $securepassword).GetNetworkCredential().Password
         break
     }
 }
+Invoke-Nssm set $ServiceConfig.Name objectname $ntAccountName $ntAccountPass
 
-switch ($ServiceConfig.Startup) {
+$startup = switch ($ServiceConfig.Startup) {
     { 'SERVICE_AUTO_START', 'AUTOMATIC' -contains $_ } {
-        Invoke-Nssm set $ServiceConfig.Name start SERVICE_AUTO_START
+        'SERVICE_AUTO_START'
         break
     }
     { 'SERVICE_DELAYED_AUTO_START', 'DELAYED', 'AUTOMATIC (DELAYED START)' -contains $_ } {
-        Invoke-Nssm set $ServiceConfig.Name start SERVICE_DELAYED_AUTO_START
+        'SERVICE_DELAYED_AUTO_START'
         break
     }
     { 'SERVICE_DEMAND_START', 'MANUAL' -contains $_ } {
-        Invoke-Nssm set $ServiceConfig.Name start SERVICE_DEMAND_START
+        'SERVICE_DEMAND_START'
         break
     }
     { 'SERVICE_DISABLED', 'DISABLED' -contains $_ } {
-        Invoke-Nssm set $ServiceConfig.Name start SERVICE_DISABLED
+        'SERVICE_DISABLED'
         break
     }
     default {
         Write-Warning -Message "Expected Startup to be one of 'SERVICE_AUTO_START|SERVICE_DELAYED_START|SERVICE_DEMAND_START|SERVICE_DISABLED', but was '$_'."
+        'SERVICE_DEMAND_START'
         break
     }
 }
+Invoke-Nssm set $ServiceConfig.Name start $startup
 
 # give the service user permissions to write/rotate logs
-$runas = Invoke-Nssm get $ServiceConfig.Name objectname # nssm normalizes the name
+$runas = (New-Object -TypeName System.Security.Principal.NTAccount -ArgumentList $ntAccountName).Translate([System.Security.Principal.SecurityIdentifier])
 $acl = Get-Acl -Path $logDirectory
 $ace = New-Object System.Security.AccessControl.FileSystemAccessRule -ArgumentList $runas, 'Read,Write,Synchronize,DeleteSubdirectoriesAndFiles', 'ContainerInherit,ObjectInherit', 'None', 'Allow'
 $acl.AddAccessRule($ace)
