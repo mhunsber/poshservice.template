@@ -20,6 +20,9 @@ This is a chocolatey template and requires that you have chocolatey installed. <
 Packages created from the template require the latest stable version of nssm (2.24.0).
 The prerelease version (2.24.101) of nssm gets stuck during shutdown when online file rotation is enabled.
 
+Packages created from the template also require at least PowerShell version 5.1, but it is possible to make it compatible with earlier versions of PowerShell by
+changing the startservice.psd1 file to another format (such as json), and modifying the `chocolateyInstall.ps1` script to read it.
+
 ## Getting Started
 
 1. Clone this repository locally.
