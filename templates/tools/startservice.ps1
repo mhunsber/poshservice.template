@@ -1,5 +1,11 @@
 ﻿[cmdletbinding()]
 param()
+if( $Host -and $Host.UI -and $Host.UI.RawUI ) {
+    $width = [Math]::Min($Host.UI.RawUI.MaxPhysicalWindowSize.Width, 1000)
+    $Host.UI.RawUI.BufferSize = New-Object -TypeName System.Management.Automation.Host.Size -ArgumentList $width, $Host.UI.RawUI.BufferSize.Height
+    $Host.UI.RawUI.WindowSize = New-Object -TypeName System.Management.Automation.Host.Size -ArgumentList $width, $Host.UI.RawUI.WindowSize.Height
+}
+
 $ea = $ErrorActionPreference
 $ErrorActionPreference = 'Stop' # until we are ready for the loop
 if ($env:PSS_VERBOSELOG -eq '1') { $VerbosePreference = 'Continue' }
