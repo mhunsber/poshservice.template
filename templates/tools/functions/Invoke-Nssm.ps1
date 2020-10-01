@@ -1,4 +1,4 @@
-function Invoke-Nssm {
+﻿function Invoke-Nssm {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
@@ -20,7 +20,6 @@ function Invoke-Nssm {
     $pinfo.UseShellExecute = $false
     $pinfo.Arguments = (,$Command + $ArgumentList | ForEach-Object { '"' + $_.Replace('"','\"') + '"' } ) -join ' '
     $p = New-Object System.Diagnostics.Process
-    Write-Verbose -Message ('starting process: {0} {1}' -f $pinfo.FileName, $pinfo.Arguments)
     $p.StartInfo = $pinfo
     $p.Start() | Out-Null
     $p.WaitForExit()
